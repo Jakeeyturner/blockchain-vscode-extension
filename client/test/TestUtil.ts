@@ -25,5 +25,17 @@ export class TestUtil {
             const context: vscode.ExtensionContext = ExtensionUtil.getExtensionContext();
             myExtension.registerCommands(context);
         }
+
+        await this.storePackageDirectory();
     }
+
+    static async storePackageDirectory() {
+        this.USER_CONFIG =  await vscode.workspace.getConfiguration().get('fabric.package.directory');
+    }
+
+    static async restorePackageDirectory() {
+        return await vscode.workspace.getConfiguration().update('fabric.package.directory', this.USER_CONFIG);
+    }
+
+    private static USER_CONFIG;
 }

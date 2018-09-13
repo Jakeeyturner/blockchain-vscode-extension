@@ -31,6 +31,10 @@ describe('AddConnectionIdentityCommand', () => {
         await TestUtil.setupTests();
     });
 
+    after(async () => {
+        await TestUtil.restorePackageDirectory();
+    });
+
     describe('addConnectionIdentity', () => {
         let mySandBox;
 

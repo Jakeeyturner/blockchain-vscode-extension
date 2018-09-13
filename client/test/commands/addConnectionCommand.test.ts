@@ -31,6 +31,10 @@ describe('AddConnectionCommand', () => {
         await TestUtil.setupTests();
     });
 
+    after(async () => {
+        await TestUtil.restorePackageDirectory();
+    });
+
     describe('addConnection', () => {
 
         beforeEach(async () => {
