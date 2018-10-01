@@ -169,7 +169,9 @@ export abstract class FabricConnection implements IFabricConnection {
             throw new Error(msg);
         }
 
-        eventHandler.cancelListening();
+        // eventHandler.waitForEvents()
+
+        // eventHandler.cancelListening();
     }
 
     public disconnect() {
