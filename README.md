@@ -40,7 +40,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/start_new_project.giff" width="85%" alt="Start a new Fabric smart contract project">
+<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/start_new_project.gif" width="85%" alt="Start a new Fabric smart contract project">
 <!---Link to docs with further instructions
 --->
 
