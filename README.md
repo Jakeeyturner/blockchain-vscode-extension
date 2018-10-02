@@ -76,14 +76,14 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/resources.png" width="50%" alt="Connect to the network and discover the existing resources">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/resources.png" width="40%" alt="Connect to the network and discover the existing resources">
 <!---Link to docs with further instructions
 --->
 ## Install new chaincode
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png" width="50%" alt="Install new chaincode">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png" width="40%" alt="Install new chaincode">
 <!---Link to docs with further instructions
 --->
 
@@ -91,7 +91,8 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="75%" alt="Instantiate new chaincode">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="40%" alt="Instantiate new chaincode">
+
 <!---Link to docs with further instructions
 --->
 
