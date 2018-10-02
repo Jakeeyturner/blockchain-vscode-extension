@@ -176,11 +176,6 @@
                 "category": "Blockchain"
             },
             {
-                "command": "blockchainExplorer.testEntry",
-                "title": "Test",
-                "category": "Blockchain"
-            },
-            {
                 "command": "blockchainAPackageExplorer.refreshEntry",
                 "title": "Refresh Smart Contract Packages",
                 "icon": {
@@ -191,7 +186,7 @@
             },
             {
                 "command": "blockchainAPackageExplorer.packageSmartContractProject",
-                "title": "Add Smart Contract Package",
+                "title": "Create Smart Contract Package",
                 "icon": {
                     "light": "resources/light/add_light.svg",
                     "dark": "resources/dark/add.svg"
@@ -225,6 +220,12 @@
             }
         ],
         "menus": {
+            "commandPalette": [
+                {
+                    "when": "false",
+                    "command": "blockchainExplorer.refreshEntry"
+                }
+            ],
             "view/title": [
                 {
                     "command": "blockchainExplorer.addConnectionEntry",
@@ -253,10 +254,6 @@
                 }
             ],
             "view/item/context": [
-                {
-                    "command": "blockchainExplorer.testEntry",
-                    "when": "view == blockchainExplorer && viewItem == blockchain-instantiated-chaincode-item"
-                },
                 {
                     "command": "blockchainExplorer.deleteConnectionEntry",
                     "when": "view == blockchainExplorer && viewItem == blockchain-connection-item"
