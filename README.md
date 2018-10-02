@@ -40,7 +40,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="75%" alt="Start a new Fabric chaincode project">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="85%" alt="Start a new Fabric chaincode project">
 <!---Link to docs with further instructions
 --->
 
@@ -48,7 +48,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="75%" alt="Edit chaincode files">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="85%" alt="Edit chaincode files">
 <!---Link to docs with further instructions
 --->
 
@@ -65,8 +65,11 @@ Coming in a later version. See [issue #2](https://github.ibm.com/IBM-Blockchain/
 --->
 <!---Introduction to Fabric view
 --->
-## Create and connect to local_fabric runtime
+## Connect to local_fabric runtime
 Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain/fabric-vscode-extension/issues/10) 
+
+<img src="https://github.com/Jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/connect_to_local_fabric_runtime.gif" width="90%" alt="Connect to local_fabric runtime">
+
 <!---Short explanation with code-blocks
 --->
 <!---Screenshot of UI/Video of prototype click-through 
@@ -111,5 +114,21 @@ Coming in a later version. See [issue #18](https://github.ibm.com/IBM-Blockchain
 The IBM Blockchain extension provides commands in the Command Palette for working with chaincode files:
 <!---Table of commands with columns: 'command' and 'description'
 --->
+
+## Supported Operating Systems 
+
+Linux and Mac OS are currently the only supported operating systems for use with the extension.
+
+The work to implement Windows support can be tracked in [Issue 72](https://github.com/IBM-Blockchain/blockchain-vscode-extension/issues/72).
+
+
+## Telemetry Reporting
+
+The extension uses telemetry reporting to track usage data and help improve future extension versions.
+
+For instructions on how to disable telemetry reporting, please visit the visit the [Visual Studio Code FAQ](https://code.visualstudio.com/docs/supporting/FAQ#_how-to-disable-telemetry-reporting).
+
+
+
 ## License <a name="license"></a>
 The source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
