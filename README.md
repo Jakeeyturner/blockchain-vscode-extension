@@ -39,7 +39,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 ## Start a new Fabric chaincode project
 <!---Short explanation with code-blocks
 --->
-![Start a new Fabric chaincode project](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif "Start a new Fabric chaincode project")
+![Start a new Fabric chaincode project](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif "Start a new Fabric chaincode project" | width=100)
 <!---Link to docs with further instructions
 --->
 ## Edit/ write chaincode files
