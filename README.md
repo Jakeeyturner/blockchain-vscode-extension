@@ -40,7 +40,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/readmeupdates/client/media/start_new_project.gif" width="85%" alt="Start a new Fabric smart contract project">
+<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/start_new_project.giff" width="85%" alt="Start a new Fabric smart contract project">
 <!---Link to docs with further instructions
 --->
 
@@ -48,7 +48,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/readmeupdates/client/media/edit_write_files.png" width="85%" alt="Edit smart contract files">
+<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/edit_write_files.png" width="85%" alt="Edit smart contract files">
 <!---Link to docs with further instructions
 --->
 
@@ -88,7 +88,7 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/readmeupdates/client/media/install_smart_contract.png" width="40%" alt="Install new smart contract">
+<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/issue-112/client/media/install_smart_contract.png" width="40%" alt="Install new smart contract">
 
 <!---Link to docs with further instructions
 --->
