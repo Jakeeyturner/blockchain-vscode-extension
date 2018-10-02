@@ -42,6 +42,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="75%" alt="Start a new Fabric chaincode project">
 <!---Link to docs with further instructions
 --->
+
 ## Edit/ write chaincode files
 <!---Short explanation with code-blocks
 --->
@@ -49,6 +50,7 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 <img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="75%" alt="Edit chaincode files">
 <!---Link to docs with further instructions
 --->
+
 ## Create a package from a chaincode project
 Coming in a later version. See [issue #2](https://github.ibm.com/IBM-Blockchain/fabric-vscode-extension/issues/2) 
 <!---Short explanation with code-blocks
