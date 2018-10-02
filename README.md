@@ -39,14 +39,13 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 ## Start a new Fabric chaincode project
 <!---Short explanation with code-blocks
 --->
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="75%">
-
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="75%" alt="Start a new Fabric chaincode project">
 <!---Link to docs with further instructions
 --->
 ## Edit/ write chaincode files
 <!---Short explanation with code-blocks
 --->
-![Edit chaincode files](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png "Edit chaincode files")
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="75%" alt="Edit chaincode files">
 <!---Link to docs with further instructions
 --->
 ## Create a package from a chaincode project
@@ -73,22 +72,19 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 ## Connect to a specified (remote) Fabric runtime and discover the existing resources
 <!---Short explanation with code-blocks
 --->
-![Connect to a specificed(remote)Fabric runtime and discover the existing resources](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/resources.png "Connect to the network and discover the existing resources")
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/resources.png" width="75%" alt="Connect to the network and discover the existing resources">
 <!---Link to docs with further instructions
 --->
 ## Install new chaincode
 <!---Short explanation with code-blocks
 --->
-![Install new chaincode](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png "Install new chaincode")
-![Install new chaincode](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%202.png "Install new chaincode")
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png" width="75%" alt="Install new chaincode">
 <!---Link to docs with further instructions
 --->
 ## Instantiate new chaincode
 <!---Short explanation with code-blocks
 --->
-![Instantiate new chaincode](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png
- "Instantiate new chaincode")
-![Instantiate new chaincode](https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%202.png "Instantiate new chaincode")
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="75%" alt="Instantiate new chaincode">
 <!---Link to docs with further instructions
 --->
 ## Test new chaincode
