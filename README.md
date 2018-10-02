@@ -84,11 +84,11 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <!---Link to docs with further instructions
 --->
 
-## Install new chaincode
+## Install new smart contract
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png" width="40%" alt="Install new chaincode">
+<img src="https://github.com/jakeeyturner/blockchain-vscode-extension/blob/readmeupdates/client/media/install_smart_contract.png" width="40%" alt="Install new smart contract">
 
 <!---Link to docs with further instructions
 --->
