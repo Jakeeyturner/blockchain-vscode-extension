@@ -36,23 +36,23 @@ docker tag nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-1.3.0-sta
 
 <!---Things you can do in the Explorer view once the extension is installed
 --->
-## Start a new Fabric chaincode project
+## Start a new Fabric smart contract project
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="85%" alt="Start a new Fabric chaincode project">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/smart_Contract_project-2.gif" width="85%" alt="Start a new Fabric smart contract project">
 <!---Link to docs with further instructions
 --->
 
-## Edit/ write chaincode files
+## Edit / write smart contract files
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="85%" alt="Edit chaincode files">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/4%20.edit%20chaincode.png" width="85%" alt="Edit smart contract files">
 <!---Link to docs with further instructions
 --->
 
-## Create a package from a chaincode project
+## Create a package from a smart contract project
 Coming in a later version. See [issue #2](https://github.ibm.com/IBM-Blockchain/fabric-vscode-extension/issues/2) 
 <!---Short explanation with code-blocks
 --->
@@ -93,16 +93,16 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <!---Link to docs with further instructions
 --->
 
-## Instantiate new chaincode
+## Instantiate new smart contract
 <!---Short explanation with code-blocks
 --->
 
-<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="40%" alt="Instantiate new chaincode">
+<img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="40%" alt="Instantiate new smart contract">
 
 <!---Link to docs with further instructions
 --->
 
-## Test new chaincode
+## Test new smart contract
 <!---Short explanation with code-blocks
 --->
 <!---Screenshot of UI/Video of prototype click-through 
