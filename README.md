@@ -86,6 +86,7 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/install%20chaincode%201.png" width="50%" alt="Install new chaincode">
 <!---Link to docs with further instructions
 --->
+
 ## Instantiate new chaincode
 <!---Short explanation with code-blocks
 --->
@@ -93,6 +94,7 @@ Coming in a later version. See [issue #10](https://github.ibm.com/IBM-Blockchain
 <img src="https://github.com/simran-sohanpal/blockchain-vscode-extension/blob/readmeupdates/client/media/instantiate%20chaincode%201.png" width="75%" alt="Instantiate new chaincode">
 <!---Link to docs with further instructions
 --->
+
 ## Test new chaincode
 <!---Short explanation with code-blocks
 --->
