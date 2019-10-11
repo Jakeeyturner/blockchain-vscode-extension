@@ -25,6 +25,7 @@ import { LogType } from '../logging/OutputAdapter';
 import { GlobalState, ExtensionData } from '../util/GlobalState';
 import { Dependencies } from './Dependencies';
 import { FabricRuntimeUtil } from '../fabric/FabricRuntimeUtil';
+import { Terminal } from '../terminal/Terminal';
 
 export class DependencyManager {
 
@@ -472,21 +473,15 @@ export class DependencyManager {
                 outputAdapter.log(LogType.INFO, undefined, 'Rebuilding native node modules');
                 progress.report({ message: 'Rebuilding native node modules' });
 
-                // npm needs to run in a shell on Windows
-                const shell: boolean = (process.platform === 'win32') ? true : false;
+                const terminal: Terminal = Terminal.instance();
+                let cmd: string = `npm rebuild ${dependency} --target=${info.longVersion} --runtime=${runtime} --update-binary --fallback-to-build --target_arch=${architecture}`;
 
-                try {
-                    const args: string[] = ['rebuild', dependency, `--target=${info.longVersion}`, `--runtime=${runtime}`, '--update-binary', '--fallback-to-build', `--target_arch=${architecture}`];
-                    if (!remote) {
-                        args.push('--dist-url=https://atom.io/download/electron');
-                    }
-
-                    await CommandUtil.sendCommandWithOutput('npm', args, extensionPath, null, outputAdapter, shell);
-
-                } catch (error) {
-                    outputAdapter.log(LogType.ERROR, `Could not rebuild native dependencies ${error.message}. Please ensure that you have node and npm installed`);
-                    throw error;
+                if (!remote) {
+                    cmd += ' --dist-url=https://atom.io/download/electron';
                 }
+
+                terminal.show();
+                terminal.sendCommand(cmd, extensionPath);
 
                 if (!remote && semver.lt(info.longVersion, '6.0.0')) {
                     progress.report({ message: `Updating ${dependency}` });
@@ -500,7 +495,18 @@ export class DependencyManager {
                     if (exists) {
                         await fs.remove(origPath);
                     }
-                    await fs.rename(newPath, origPath);
+                    try {
+                        await fs.rename(newPath, origPath);
+                    } catch (error) {
+                        throw new Error(`Could not rename gRPC: ${error.message}.`);
+                    }
+                }
+
+                try {
+                    // Can we definitely require the native dependencies?
+                    await this.requireNativeDependencies();
+                } catch (error) {
+                    throw new Error(`Could not load gRPC: ${error.message}.`);
                 }
             }
 

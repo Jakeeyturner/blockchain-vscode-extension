@@ -134,10 +134,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         // We only want to do this stuff if the extension has all the required dependencies
         if (dependenciesInstalled || bypassPreReqs) {
             await ExtensionUtil.completeActivation(extensionUpdated);
+            outputAdapter.show();
 
         }
 
     } catch (error) {
+        outputAdapter.show();
         outputAdapter.log(LogType.ERROR, undefined, `Failed to activate extension: ${error.toString()}`);
         await UserInputUtil.failedActivationWindow(error.message);
     }
