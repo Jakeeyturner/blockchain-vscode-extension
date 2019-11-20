@@ -75,6 +75,9 @@ export class PreReqView extends View {
 
                 this.restoreCommandHijack = true;
 
+                const localFabricFunctionality: boolean = message.localFabricFunctionality;
+                await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_LOCAL_FABRIC, localFabricFunctionality, vscode.ConfigurationTarget.Global);
+
                 panel.dispose();
 
             } else if (message.command === 'check') {
@@ -85,6 +88,9 @@ export class PreReqView extends View {
                     cancellable: false
                 }, async (progress: vscode.Progress<{ message: string }>) => {
                     progress.report({ message: `Checking installed dependencies` });
+
+                    const localFabricFunctionality: boolean = message.localFabricFunctionality;
+                    await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_LOCAL_FABRIC, localFabricFunctionality, vscode.ConfigurationTarget.Global);
 
                     const dependencyManager: DependencyManager = DependencyManager.instance();
                     const dependencies: any = await dependencyManager.getPreReqVersions();
@@ -112,7 +118,7 @@ export class PreReqView extends View {
                     // Are all the required dependencies installed?
                     const isComplete: boolean = await dependencyManager.hasPreReqsInstalled(dependencies);
 
-                    panel.webview.html = await this.getHTMLString(dependencies, isComplete);
+                    panel.webview.html = await this.getHTMLString(dependencies, isComplete, localFabricFunctionality);
 
                     const outputAdapter: VSCodeBlockchainOutputAdapter = VSCodeBlockchainOutputAdapter.instance();
                     outputAdapter.log(LogType.SUCCESS, undefined, 'Finished checking installed dependencies');
@@ -142,10 +148,12 @@ export class PreReqView extends View {
 
                 await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_BYPASS_PREREQS, true, vscode.ConfigurationTarget.Global);
 
+                const localFabricFunctionality: boolean = message.localFabricFunctionality;
+                await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_LOCAL_FABRIC, localFabricFunctionality, vscode.ConfigurationTarget.Global);
+
                 this.restoreCommandHijack = true;
                 panel.dispose();
             }
-
         });
     }
 
@@ -153,7 +161,7 @@ export class PreReqView extends View {
         return;
     }
 
-    async getHTMLString(dependencies?: any, isComplete?: boolean): Promise<any> {
+    async getHTMLString(dependencies?: any, isComplete?: boolean, localFabricFunctionality?: boolean): Promise<any> {
         const packageJson: any = await ExtensionUtil.getPackageJSON();
         const extensionPath: string = ExtensionUtil.getExtensionPath();
         const extensionVersion: string = packageJson.version;
@@ -163,7 +171,7 @@ export class PreReqView extends View {
             dependencies = await dependencyManager.getPreReqVersions();
         }
 
-        if (!isComplete) {
+        if (isComplete === undefined) {
             isComplete = await dependencyManager.hasPreReqsInstalled(dependencies);
         }
 
@@ -204,6 +212,10 @@ export class PreReqView extends View {
             celebrateImage
         };
 
+        if (localFabricFunctionality === undefined) {
+            localFabricFunctionality = vscode.workspace.getConfiguration().get(SettingConfigurations.EXTENSION_LOCAL_FABRIC);
+        }
+
         const options: any = {
             extensionVersion,
             installedDependencies,
@@ -213,7 +225,8 @@ export class PreReqView extends View {
             commands : {
                 OPEN_HOME_PAGE: ExtensionCommands.OPEN_HOME_PAGE
             },
-            isComplete: isComplete
+            isComplete,
+            localFabricFunctionality
         };
 
         const templatePath: string = path.join(__dirname, '..', '..', '..', 'templates', 'PreReqView.ejs');
