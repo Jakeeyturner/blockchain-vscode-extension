@@ -51,6 +51,7 @@
         "onCommand:gatewaysExplorer.exportConnectionProfileEntry",
         "onCommand:gatewaysExplorer.exportConnectionProfileConnectedEntry",
         "onCommand:aPackagesExplorer.createSmartContractProjectEntry",
+        "onCommand:aPackagesExplorer.createPrivateDataSmartContractProjectEntry",
         "onCommand:aPackagesExplorer.packageSmartContractProjectEntry",
         "onCommand:aPackagesExplorer.deleteSmartContractPackageEntry",
         "onCommand:aPackagesExplorer.exportSmartContractPackageEntry",

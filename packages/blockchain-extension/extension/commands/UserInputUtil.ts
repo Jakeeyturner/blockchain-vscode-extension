@@ -82,14 +82,18 @@ export class UserInputUtil {
     static readonly TWO_ORG_TEMPLATE: string = `2 Org template (2 CAs, 2 peers, 1 channel)`;
     static readonly CREATE_ADDITIONAL_LOCAL_NETWORKS: string = `Create additional local networks (tutorial)`;
 
-    public static async showQuickPick(prompt: string, items: string[], canPickMany: boolean = false): Promise<string | string[]> {
-        const quickPickOptions: vscode.QuickPickOptions = {
-            ignoreFocusOut: true,
-            canPickMany: canPickMany,
-            placeHolder: prompt
-        };
+    public static async showQuickPick(prompt: string, items: string[] | {label: string, description: string}, canPickMany: boolean = false): Promise<string | string[]> {
 
-        return vscode.window.showQuickPick(items, quickPickOptions);
+        if (items instanceof Array) {
+            const quickPickOptions: vscode.QuickPickOptions = {
+                ignoreFocusOut: true,
+                canPickMany: canPickMany,
+                placeHolder: prompt
+            };
+            return vscode.window.showQuickPick(items, quickPickOptions);
+        } else {
+            const someString: string = 'someString';
+        }
     }
 
     public static async showQuickPickItem<T>(prompt: string, items: IBlockchainQuickPickItem<T>[], canPickMany: boolean = false): Promise<IBlockchainQuickPickItem<T> | IBlockchainQuickPickItem<T>[]> {
