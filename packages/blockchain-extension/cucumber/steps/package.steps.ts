@@ -29,7 +29,7 @@ module.exports = function(): any {
      * Given
      */
 
-    this.Given('the contract has been packaged', this.timeout, async () => {
+    this.Given(/the( private)? contract has been packaged/, this.timeout, async (_privateOrNot: string) => {
         await this.smartContractHelper.packageSmartContract(this.contractName, this.contractVersion, this.contractLanguage, this.contractDirectory);
     });
 

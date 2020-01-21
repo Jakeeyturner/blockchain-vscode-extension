@@ -24,7 +24,6 @@ import * as through from 'through2';
 import stripAnsi = require('strip-ansi');
 
 export class LocalEnvironment extends ManagedAnsibleEnvironment {
-    public ourLoghose: any;
     public ports: FabricRuntimePorts;
     private dockerName: string;
     private numberOfOrgs: number;
@@ -121,7 +120,7 @@ export class LocalEnvironment extends ManagedAnsibleEnvironment {
             },
             newline: true
         };
-        const lh: any = this.ourLoghose(opts);
+        const lh: any = this.getLoghose(opts);
 
         lh.pipe(through.obj((chunk: any, _enc: any, cb: any) => {
             const name: string = chunk.name;

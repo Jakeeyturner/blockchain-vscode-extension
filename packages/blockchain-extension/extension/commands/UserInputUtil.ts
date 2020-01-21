@@ -77,23 +77,23 @@ export class UserInputUtil {
     static readonly ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION: string = '(by providing node JSON files)';
     static readonly ADD_ENVIRONMENT_FROM_DIR: string = 'Add an Ansible-created network';
     static readonly ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION: string = '(browse for directory)';
+    static readonly GENERATE_DEFAULT_CONTRACT: string = 'Default Contract';
+    static readonly GENERATE_DEFAULT_CONTRACT_DESCRIPTION: string = 'Demonstrates CRUD operations to a ledger shared by all network members';
+    static readonly GENERATE_PD_CONTRACT: string = 'Private Data Contract';
+    static readonly GENERATE_PD_CONTRACT_DESCRIPTION: string = 'Demonstrates CRUD + verify operations to a collection that is private to single network members';
 
     static readonly ONE_ORG_TEMPLATE: string = `1 Org template (1 CA, 1 peer, 1 channel)`;
     static readonly TWO_ORG_TEMPLATE: string = `2 Org template (2 CAs, 2 peers, 1 channel)`;
     static readonly CREATE_ADDITIONAL_LOCAL_NETWORKS: string = `Create additional local networks (tutorial)`;
 
-    public static async showQuickPick(prompt: string, items: string[] | {label: string, description: string}, canPickMany: boolean = false): Promise<string | string[]> {
+    public static async showQuickPick(prompt: string, items: string[], canPickMany: boolean = false): Promise<string | string[]> {
+        const quickPickOptions: vscode.QuickPickOptions = {
+            ignoreFocusOut: true,
+            canPickMany: canPickMany,
+            placeHolder: prompt
+        };
 
-        if (items instanceof Array) {
-            const quickPickOptions: vscode.QuickPickOptions = {
-                ignoreFocusOut: true,
-                canPickMany: canPickMany,
-                placeHolder: prompt
-            };
-            return vscode.window.showQuickPick(items, quickPickOptions);
-        } else {
-            const someString: string = 'someString';
-        }
+        return vscode.window.showQuickPick(items, quickPickOptions);
     }
 
     public static async showQuickPickItem<T>(prompt: string, items: IBlockchainQuickPickItem<T>[], canPickMany: boolean = false): Promise<IBlockchainQuickPickItem<T> | IBlockchainQuickPickItem<T>[]> {

@@ -35,7 +35,7 @@ export enum LanguageType {
 
 module.exports = function(): any {
 
-    this.Then(/^there (should|shouldn't) be an? (environment connected |installed smart contract |instantiated smart contract |Channels |Node |Organizations |identity )?tree item with a label '(.*?)' in the '(Smart Contracts|Fabric Environments|Fabric Gateways|Fabric Wallets)' panel( for item)?( .*)?$/, this.timeout, async (shouldOrshouldnt: string, child: string, label: string, panel: string, thing2: string, thing: string) => {
+    this.Then(/^there (should|shouldn't) be an? (environment connected |installed smart contract |instantiated smart contract |instantiated private smart contract |Channels |Node |Organizations |identity )?tree item with a label '(.*?)' in the '(Smart Contracts|Fabric Environments|Fabric Gateways|Fabric Wallets)' panel( for item)?( .*)?$/, this.timeout, async (shouldOrshouldnt: string, child: string, label: string, panel: string, thing2: string, thing: string) => {
         let treeItems: any[];
         if (panel === 'Smart Contracts') {
             const blockchainPackageExplorerProvider: BlockchainPackageExplorerProvider = ExtensionUtil.getBlockchainPackageExplorerProvider();
@@ -52,7 +52,7 @@ module.exports = function(): any {
                 const allTreeItems: any[] = await blockchainRuntimeExplorerProvider.getChildren();
                 const smartContracts: any[] = await blockchainRuntimeExplorerProvider.getChildren(allTreeItems[1]);
                 treeItems = await blockchainRuntimeExplorerProvider.getChildren(smartContracts[0]); // Installed smart contracts
-            } else if (child.includes('instantiated smart contract')) {
+            } else if (child.includes('instantiated smart contract') || (child.includes('instantiated private smart contract'))) {
                 const allTreeItems: any[] = await blockchainRuntimeExplorerProvider.getChildren();
                 const smartContracts: any[] = await blockchainRuntimeExplorerProvider.getChildren(allTreeItems[1]);
                 treeItems = await blockchainRuntimeExplorerProvider.getChildren(smartContracts[1]); // Instantiated smart contracts

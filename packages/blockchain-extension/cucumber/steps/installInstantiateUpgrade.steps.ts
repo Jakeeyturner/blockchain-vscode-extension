@@ -27,7 +27,7 @@ module.exports = function(): any {
      * Given
      */
 
-    this.Given('the package has been installed', this.timeout, async () => {
+    this.Given(/the( private)? package has been installed/, this.timeout, async (_privateOrNot: string) => {
         await this.smartContractHelper.installSmartContract(this.contractName, this.contractVersion);
     });
 
