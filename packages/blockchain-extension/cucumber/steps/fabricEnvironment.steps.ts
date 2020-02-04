@@ -38,7 +38,7 @@ module.exports = function(): any {
     this.Given(`the ${FabricRuntimeUtil.LOCAL_FABRIC} is running`, this.timeout, async () => {
 
         const runtimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
-        const runtime: LocalEnvironment = runtimeManager.getRuntime();
+        const runtime: LocalEnvironment = runtimeManager.ensureRuntime(FabricRuntimeUtil.LOCAL_FABRIC, {startPort: 17050, endPort: 17069}, 1);
 
         let isRunning: boolean = await runtime.isRunning();
         if (!isRunning) {
@@ -101,7 +101,7 @@ module.exports = function(): any {
 
     this.When(`I stop the ${FabricRuntimeUtil.LOCAL_FABRIC}`, this.timeout, async () => {
         const runtimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
-        const runtime: LocalEnvironment = runtimeManager.getRuntime();
+        const runtime: LocalEnvironment = runtimeManager.ensureRuntime(FabricRuntimeUtil.LOCAL_FABRIC, {startPort: 17050, endPort: 17069}, 1);
 
         await vscode.commands.executeCommand(ExtensionCommands.STOP_FABRIC);
         const isRunning: boolean = await runtime.isRunning();
@@ -110,7 +110,7 @@ module.exports = function(): any {
 
     this.When(`I start the ${FabricRuntimeUtil.LOCAL_FABRIC}`, this.timeout, async () => {
         const runtimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
-        const runtime: LocalEnvironment = runtimeManager.getRuntime();
+        const runtime: LocalEnvironment = runtimeManager.ensureRuntime(FabricRuntimeUtil.LOCAL_FABRIC, {startPort: 17050, endPort: 17069}, 1);
 
         await vscode.commands.executeCommand(ExtensionCommands.START_FABRIC);
         const isRunning: boolean = await runtime.isRunning();
@@ -119,7 +119,7 @@ module.exports = function(): any {
 
     this.When(`I teardown the ${FabricRuntimeUtil.LOCAL_FABRIC}`, this.timeout, async () => {
         const runtimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
-        const runtime: LocalEnvironment = runtimeManager.getRuntime();
+        const runtime: LocalEnvironment = runtimeManager.ensureRuntime(FabricRuntimeUtil.LOCAL_FABRIC, {startPort: 17050, endPort: 17069}, 1);
 
         await vscode.commands.executeCommand(ExtensionCommands.TEARDOWN_FABRIC, undefined, true, FabricRuntimeUtil.LOCAL_FABRIC);
         const isRunning: boolean = await runtime.isRunning();

@@ -63,7 +63,8 @@ export class FabricGatewayRegistry extends FileRegistry<FabricGatewayRegistryEnt
 
         // just get the ansible ones
         environmentEntries = environmentEntries.filter((entry: FabricEnvironmentRegistryEntry) => {
-            return entry.environmentType === EnvironmentType.ANSIBLE_ENVIRONMENT;
+            // TODO JAKE: Figure out if we want to check for Local here as well
+            return entry.environmentType === EnvironmentType.ANSIBLE_ENVIRONMENT || entry.environmentType === EnvironmentType.LOCAL_ENVIRONMENT;
         });
 
         for (const environmentEntry of environmentEntries) {

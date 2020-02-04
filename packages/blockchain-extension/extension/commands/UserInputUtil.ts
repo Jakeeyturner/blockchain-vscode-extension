@@ -71,10 +71,16 @@ export class UserInputUtil {
     static readonly ADD_IDENTITY: string = '+ Add identity';
     static readonly ADD_GATEWAY_FROM_ENVIRONMENT: string = 'Create a gateway from a Fabric environment';
     static readonly ADD_GATEWAY_FROM_CCP: string = 'Create a gateway from a connection profile';
+    static readonly ADD_ENVIRONMENT_FROM_TEMPLATE: string = 'Create new from template';
+    static readonly ADD_ENVIRONMENT_FROM_TEMPLATE_DESCRIPTION: string = '(uses Docker on your local machine)';
     static readonly ADD_ENVIRONMENT_FROM_NODES: string = 'Add any other Fabric network';
     static readonly ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION: string = '(by providing node JSON files)';
     static readonly ADD_ENVIRONMENT_FROM_DIR: string = 'Add an Ansible-created network';
     static readonly ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION: string = '(browse for directory)';
+
+    static readonly ONE_ORG_TEMPLATE: string = `1 Org template (1 CA, 1 peer, 1 channel)`;
+    static readonly TWO_ORG_TEMPLATE: string = `2 Org template (2 CAs, 2 peers, 1 channel)`;
+    static readonly CREATE_ADDITIONAL_LOCAL_NETWORKS: string = `Create additional local networks (tutorial)`;
 
     public static async showQuickPick(prompt: string, items: string[], canPickMany: boolean = false): Promise<string | string[]> {
         const quickPickOptions: vscode.QuickPickOptions = {

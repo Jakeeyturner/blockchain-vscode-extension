@@ -46,15 +46,18 @@ describe('LocalEnvironmentManager', () => {
     before(async () => {
         await TestUtil.setupTests(sandbox);
         await TestUtil.setupLocalFabric();
-        originalRuntime = runtimeManager.getRuntime();
+        originalRuntime = runtimeManager.getRuntime(FabricRuntimeUtil.LOCAL_FABRIC);
     });
 
     beforeEach(async () => {
         sandbox = sinon.createSandbox();
         await connectionRegistry.clear();
+
         mockRuntime = sandbox.createStubInstance(LocalEnvironment);
         runtimeManager['connection'] = runtimeManager['connectingPromise'] = undefined;
-        runtimeManager['runtime'] = ((mockRuntime as any) as LocalEnvironment);
+
+        runtimeManager['runtimes'] = new Map();
+        runtimeManager['runtimes'].set(FabricRuntimeUtil.LOCAL_FABRIC, mockRuntime as unknown as LocalEnvironment);
         mockConnection = sandbox.createStubInstance(FabricEnvironmentConnection);
         sandbox.stub(FabricConnectionFactory, 'createFabricEnvironmentConnection').returns(mockConnection);
         findFreePortStub = sandbox.stub().resolves([17050, 17051, 17052, 17053, 17054, 17055, 17056]);
@@ -64,7 +67,7 @@ describe('LocalEnvironmentManager', () => {
     afterEach(async () => {
         sandbox.restore();
         runtimeManager['connection'] = runtimeManager['connectingPromise'] = undefined;
-        runtimeManager['runtime'] = undefined;
+        runtimeManager['runtimes'] = undefined;
         await connectionRegistry.clear();
     });
 
@@ -79,14 +82,16 @@ describe('LocalEnvironmentManager', () => {
 
     describe('#getRuntime', () => {
         it('should return the runtime', () => {
-            runtimeManager.getRuntime().should.equal(mockRuntime);
+            runtimeManager.getRuntime(FabricRuntimeUtil.LOCAL_FABRIC).should.equal(mockRuntime);
         });
     });
 
     describe('#initialize', () => {
         beforeEach(() => {
             mockRuntime.isCreated.resolves(true);
-            Object.defineProperty(runtimeManager, 'runtime', {
+
+            // TODO JAKE: What is this?
+            Object.defineProperty(runtimeManager, 'runtimes', {
                 configurable: true,
                 enumerable: true,
                 get: (): LocalEnvironment => (mockRuntime as any) as LocalEnvironment,
@@ -94,14 +99,16 @@ describe('LocalEnvironmentManager', () => {
             });
         });
 
-        it('should use existing configuration and import all wallets/identities', async () => {
+        it.only('should use existing configuration and import all wallets/identities', async () => {
             await vscode.workspace.getConfiguration().update(SettingConfigurations.FABRIC_RUNTIME, {
-                ports: {
-                    startPort: 17050,
-                    endPort: 17070
+                '1 Org Local Fabric': {
+                    ports: {
+                        startPort: 17050,
+                        endPort: 17070
+                    }
                 }
             }, vscode.ConfigurationTarget.Global);
-            await runtimeManager.initialize();
+            await runtimeManager.initialize(FabricRuntimeUtil.LOCAL_FABRIC, 1);
             mockRuntime.ports.should.deep.equal({
                 startPort: 17050,
                 endPort: 17070
@@ -180,7 +187,7 @@ describe('LocalEnvironmentManager', () => {
                     otherRandomVariable: 12
                 }
             }, vscode.ConfigurationTarget.Global);
-            await runtimeManager.initialize();
+            await runtimeManager.initialize(FabricRuntimeUtil.LOCAL_FABRIC, 1);
             mockRuntime.ports.should.deep.equal({
                 startPort: 1,
                 endPort: 21
@@ -198,9 +205,11 @@ describe('LocalEnvironmentManager', () => {
         beforeEach(() => {
             getStub = sandbox.stub();
             getStub.withArgs(SettingConfigurations.FABRIC_RUNTIME).returns({
-                ports: {
-                    startPort: 17050,
-                    endPort: 17070
+                '1 Org Local Fabric': {
+                    ports: {
+                        startPort: 17050,
+                        endPort: 17070
+                    }
                 }
             });
             getStub.withArgs('fabric.runtime').returns({});

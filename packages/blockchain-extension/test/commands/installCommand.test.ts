@@ -89,7 +89,7 @@ describe('InstallCommand', () => {
             const environmentRegistryEntry: FabricEnvironmentRegistryEntry = new FabricEnvironmentRegistryEntry();
             environmentRegistryEntry.name = FabricRuntimeUtil.LOCAL_FABRIC;
             environmentRegistryEntry.managedRuntime = true;
-            environmentRegistryEntry.environmentType = EnvironmentType.ANSIBLE_ENVIRONMENT;
+            environmentRegistryEntry.environmentType = EnvironmentType.LOCAL_ENVIRONMENT;
 
             environmentRegistryStub = mySandBox.stub(FabricEnvironmentManager.instance(), 'getEnvironmentRegistryEntry').returns(environmentRegistryEntry);
 
@@ -110,7 +110,7 @@ describe('InstallCommand', () => {
             });
 
             logOutputSpy = mySandBox.spy(VSCodeBlockchainOutputAdapter.instance(), 'log');
-            dockerLogsOutputSpy = mySandBox.spy(VSCodeBlockchainDockerOutputAdapter.instance(), 'show');
+            dockerLogsOutputSpy = mySandBox.spy(VSCodeBlockchainDockerOutputAdapter.instance(FabricRuntimeUtil.LOCAL_FABRIC), 'show');
 
             fabricRuntimeMock.getAllPeerNames.returns(['peerOne']);
 

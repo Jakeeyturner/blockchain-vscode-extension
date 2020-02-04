@@ -97,7 +97,7 @@ describe('SubmitTransactionCommand', () => {
             showChannelPeersQuickPickStub = mySandBox.stub(UserInputUtil, 'showChannelPeersQuickPick');
 
             logSpy = mySandBox.spy(VSCodeBlockchainOutputAdapter.instance(), 'log');
-            dockerLogsOutputSpy = mySandBox.spy(VSCodeBlockchainDockerOutputAdapter.instance(), 'show');
+            dockerLogsOutputSpy = mySandBox.spy(VSCodeBlockchainDockerOutputAdapter.instance(FabricRuntimeUtil.LOCAL_FABRIC), 'show');
 
             fabricClientConnectionMock.submitTransaction.resolves();
 
@@ -206,7 +206,8 @@ describe('SubmitTransactionCommand', () => {
 
         it('should show logs if local runtime', async () => {
             const registryEntry: FabricGatewayRegistryEntry = new FabricGatewayRegistryEntry();
-            registryEntry.name = FabricRuntimeUtil.LOCAL_FABRIC;
+            registryEntry.name = `${FabricRuntimeUtil.LOCAL_FABRIC} - Org1`;
+            registryEntry.fromEnvironment = FabricRuntimeUtil.LOCAL_FABRIC;
             registryStub.returns(registryEntry);
             await vscode.commands.executeCommand(ExtensionCommands.SUBMIT_TRANSACTION);
             fabricClientConnectionMock.submitTransaction.should.have.been.calledWith('myContract', 'transaction1', 'myChannel', ['arg1', 'arg2', 'arg3'], 'my-contract');

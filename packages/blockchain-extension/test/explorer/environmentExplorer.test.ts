@@ -160,7 +160,7 @@ describe('environmentExplorer', () => {
                 const environmentRegistry: FabricEnvironmentRegistryEntry = new FabricEnvironmentRegistryEntry();
                 environmentRegistry.name = FabricRuntimeUtil.LOCAL_FABRIC;
                 environmentRegistry.managedRuntime = true;
-                environmentRegistry.environmentType = EnvironmentType.ANSIBLE_ENVIRONMENT;
+                environmentRegistry.environmentType = EnvironmentType.LOCAL_ENVIRONMENT;
 
                 environmentRegistryStub = mySandBox.stub(FabricEnvironmentManager.instance(), 'getEnvironmentRegistryEntry');
                 environmentRegistryStub.returns(environmentRegistry);
@@ -402,14 +402,14 @@ describe('environmentExplorer', () => {
                 const environmentRegistry: FabricEnvironmentRegistryEntry = new FabricEnvironmentRegistryEntry();
                 environmentRegistry.name = FabricRuntimeUtil.LOCAL_FABRIC;
                 environmentRegistry.managedRuntime = true;
-                environmentRegistry.environmentType = EnvironmentType.ANSIBLE_ENVIRONMENT;
+                environmentRegistry.environmentType = EnvironmentType.LOCAL_ENVIRONMENT;
 
                 environmentStub = mySandBox.stub(FabricEnvironmentManager.instance(), 'getEnvironmentRegistryEntry').returns(environmentRegistry);
 
                 blockchainRuntimeExplorerProvider = ExtensionUtil.getBlockchainEnvironmentExplorerProvider();
                 const fabricRuntimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
                 mySandBox.stub(FabricEnvironmentManager.instance(), 'getConnection').returns((fabricConnection as any) as FabricEnvironmentConnection);
-                mySandBox.stub(fabricRuntimeManager.getRuntime(), 'isRunning').resolves(true);
+                mySandBox.stub(fabricRuntimeManager.getRuntime(FabricRuntimeUtil.LOCAL_FABRIC), 'isRunning').resolves(true);
                 allChildren = await blockchainRuntimeExplorerProvider.getChildren();
 
                 const getTransactionNamesStub: sinon.SinonStub = mySandBox.stub(MetadataUtil, 'getTransactionNames');
@@ -931,12 +931,12 @@ describe('environmentExplorer', () => {
             registryEntry = new FabricEnvironmentRegistryEntry();
             registryEntry.name = FabricRuntimeUtil.LOCAL_FABRIC;
             registryEntry.managedRuntime = true;
-            registryEntry.environmentType = EnvironmentType.ANSIBLE_ENVIRONMENT;
+            registryEntry.environmentType = EnvironmentType.LOCAL_ENVIRONMENT;
             mySandBox.stub(FabricEnvironmentManager.instance(), 'getEnvironmentRegistryEntry').returns(registryEntry);
 
             const fabricRuntimeManager: LocalEnvironmentManager = LocalEnvironmentManager.instance();
-            mySandBox.stub(fabricRuntimeManager.getRuntime(), 'startLogs').resolves();
-            mySandBox.stub(fabricRuntimeManager.getRuntime(), 'stopLogs').returns(undefined);
+            // mySandBox.stub(fabricRuntimeManager.getRuntime(), 'startLogs').resolves();
+            // mySandBox.stub(fabricRuntimeManager.getRuntime(), 'stopLogs').returns(undefined);
         });
 
         afterEach(() => {
@@ -1042,7 +1042,7 @@ describe('environmentExplorer', () => {
 
             await TestUtil.setupLocalFabric();
 
-            mySandBox.stub(LocalEnvironmentManager.instance().getRuntime(), 'isRunning').resolves(false);
+            mySandBox.stub(LocalEnvironmentManager.instance().getRuntime(FabricRuntimeUtil.LOCAL_FABRIC), 'isRunning').resolves(false);
             const blockchainRuntimeExplorerProvider: BlockchainEnvironmentExplorerProvider = ExtensionUtil.getBlockchainEnvironmentExplorerProvider();
             const allChildren: Array<BlockchainTreeItem> = await blockchainRuntimeExplorerProvider.getChildren();
 

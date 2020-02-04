@@ -14,21 +14,14 @@
 
 import * as vscode from 'vscode';
 import { CommandUtil } from '../../util/CommandUtil';
-import * as request from 'request';
 import { SettingConfigurations } from '../../../configurations';
 import { FabricRuntimeState } from '../FabricRuntimeState';
-import { AnsibleEnvironment, OutputAdapter, FabricNode, FabricNodeType, ConsoleOutputAdapter, LogType } from 'ibm-blockchain-platform-common';
-import * as loghose from 'docker-loghose';
-import * as through from 'through2';
-import stripAnsi = require('strip-ansi');
+import { AnsibleEnvironment, OutputAdapter, FabricNode, FabricNodeType, ConsoleOutputAdapter } from 'ibm-blockchain-platform-common';
 
 export class ManagedAnsibleEnvironment extends AnsibleEnvironment {
-    public ourLoghose: any = loghose;
     protected busy: boolean = false;
     protected state: FabricRuntimeState;
     protected isRunningPromise: Promise<boolean>;
-
-    protected logsRequest: request.Request;
     protected lh: any = null;
 
     constructor(name: string, environmentPath: string) {
@@ -163,31 +156,11 @@ export class ManagedAnsibleEnvironment extends AnsibleEnvironment {
     }
 
     public async startLogs(outputAdapter: OutputAdapter): Promise<void> {
-        const opts: any = {
-            attachFilter: (_id: any, dockerInspectInfo: any): boolean => {
-                const labels: object = dockerInspectInfo.Config.Labels;
-                const environmentName: string = labels['fabric-environment-name'];
-                return environmentName === this.name;
-            },
-            newline: true
-        };
-        const lh: any = this.ourLoghose(opts);
-
-        lh.pipe(through.obj((chunk: any, _enc: any, cb: any) => {
-            const name: string = chunk.name;
-            const line: string = stripAnsi(chunk.line);
-            outputAdapter.log(LogType.INFO, undefined, `${name}|${line}`);
-            cb();
-        }));
-
-        this.lh = lh;
+        // TODO JAKE: Delete this and change functions in ManagedAnsibleEnvironment that call this.
     }
 
     public stopLogs(): void {
-        if (this.lh) {
-            this.lh.destroy();
-        }
-        this.lh = null;
+        // TODO JAKE: Delete this and change functions in ManagedAnsibleEnvironment that call this.
     }
 
     public setState(state: FabricRuntimeState): void {
