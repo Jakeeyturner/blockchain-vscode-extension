@@ -180,7 +180,7 @@ describe('gatewayExplorer', () => {
             it('should display the managed runtime', async () => {
                 await FabricGatewayRegistry.instance().clear();
 
-                mySandBox.stub(LocalEnvironmentManager.instance().getRuntime(), 'isRunning').resolves(true);
+                mySandBox.stub(LocalEnvironmentManager.instance().getRuntime(FabricRuntimeUtil.LOCAL_FABRIC), 'isRunning').resolves(true);
                 const blockchainGatewayExplorerProvider: BlockchainGatewayExplorerProvider = ExtensionUtil.getBlockchainGatewayExplorerProvider();
                 const allChildren: BlockchainTreeItem[] = await blockchainGatewayExplorerProvider.getChildren();
 

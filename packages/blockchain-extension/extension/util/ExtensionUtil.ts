@@ -378,77 +378,88 @@ export class ExtensionUtil {
                 const outputAdapter: VSCodeBlockchainOutputAdapter = VSCodeBlockchainOutputAdapter.instance();
 
                 const localFabricEnabled: boolean = ExtensionUtil.getExtensionLocalFabricSetting();
-                const runtime: LocalEnvironment = LocalEnvironmentManager.instance().getRuntime();
 
                 let isGenerated: boolean;
 
-                if (runtime) {
-                    isGenerated = await runtime.isGenerated();
-                } else {
-                    isGenerated = false;
+                // TODO JAKE: What are the chances this works / isn't terrible.
+                const runtimes: LocalEnvironment[] = LocalEnvironmentManager.instance().getAllRuntimes();
+                for (const runtime of runtimes) {
+
+                    if (runtime) {
+                        isGenerated = await runtime.isGenerated();
+                    } else {
+                        isGenerated = false;
+                    }
+
+                    if (!localFabricEnabled) {
+                        // Just got set to false
+                        // outputAdapter.log(LogType.INFO, `${FabricRuntimeUtil.LOCAL_FABRIC} functionality set to 'false'.`);
+                        try {
+                            // If Local Fabric is running, warn the user that it will be torndown
+                            let isRunning: boolean = false;
+                            if (runtime) {
+                                isRunning = await runtime.isRunning();
+                            }
+                            if (isRunning || isGenerated) {
+                                const reallyDoIt: boolean = await UserInputUtil.showConfirmationWarningMessage(`Toggling this feature will remove the world state and ledger data for the ${runtime.getName()} runtime. Do you want to continue?`);
+                                if (!reallyDoIt) {
+                                    // log setting variable back
+                                    // outputAdapter.log(LogType.WARNING, `Changed ${FabricRuntimeUtil.LOCAL_FABRIC} functionality back to 'true'.`);
+                                    await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_LOCAL_FABRIC, true, vscode.ConfigurationTarget.Global);
+                                    return;
+                                }
+                                await vscode.commands.executeCommand(ExtensionCommands.TEARDOWN_FABRIC, undefined, true, runtime.getName());
+                            }
+
+                            // If disabled, delete the local environment, gateway and wallet.
+                            // It's unlikely people will keep toggling the flag - doesn't matter if their local fabrics get deleted.
+                            await FabricEnvironmentRegistry.instance().delete(runtime.getName(), true);
+
+                            await vscode.commands.executeCommand('setContext', 'local-fabric-enabled', false);
+
+                        } catch (error) {
+                            outputAdapter.log(LogType.ERROR, `Error whilst toggling local Fabric functionality to false: ${error.message}`, `Error whilst toggling local Fabric functionality to false: ${error.toString()}`);
+                        }
+
+                    } else {
+                        // Just got set to true
+                        // outputAdapter.log(LogType.INFO, `${FabricRuntimeUtil.LOCAL_FABRIC} functionality set to 'true'.`);
+                        try {
+                            const bypassPreReqs: boolean = vscode.workspace.getConfiguration().get(SettingConfigurations.EXTENSION_BYPASS_PREREQS);
+                            let dependenciesInstalled: boolean = true;
+
+                            if (!bypassPreReqs) {
+                                const dependencyManager: DependencyManager = DependencyManager.instance();
+                                dependenciesInstalled = await dependencyManager.hasPreReqsInstalled();
+                                if (!dependenciesInstalled) {
+
+                                    const ctx: vscode.ExtensionContext = GlobalState.getExtensionContext();
+
+                                    this.disposeExtension(ctx);
+                                    await this.registerOpenPreReqsCommand(ctx);
+                                    const tempCommandRegistry: TemporaryCommandRegistry = TemporaryCommandRegistry.instance();
+
+                                    tempCommandRegistry.createTempCommands(false, ExtensionCommands.OPEN_PRE_REQ_PAGE);
+                                    await vscode.commands.executeCommand(ExtensionCommands.OPEN_PRE_REQ_PAGE);
+                                    return;
+                                }
+                            }
+
+                            await vscode.commands.executeCommand('setContext', 'local-fabric-enabled', true);
+                        } catch (error) {
+                            outputAdapter.log(LogType.ERROR, `Error whilst toggling local Fabric functionality to true: ${error.message}`, `Error whilst toggling local Fabric functionality to true: ${error.toString()}`);
+                        }
+                    }
                 }
 
-                if (!localFabricEnabled) {
-                    // Just got set to false
-                    outputAdapter.log(LogType.INFO, `${FabricRuntimeUtil.LOCAL_FABRIC} functionality set to 'false'.`);
-                    try {
-                        // If Local Fabric is running, warn the user that it will be torndown
-                        let isRunning: boolean = false;
-                        if (runtime) {
-                            isRunning = await LocalEnvironmentManager.instance().getRuntime().isRunning();
-                        }
-                        if (isRunning || isGenerated) {
-                            const reallyDoIt: boolean = await UserInputUtil.showConfirmationWarningMessage(`Toggling this feature will remove the world state and ledger data for the ${runtime.getName()} runtime. Do you want to continue?`);
-                            if (!reallyDoIt) {
-                                // log setting variable back
-                                outputAdapter.log(LogType.WARNING, `Changed ${FabricRuntimeUtil.LOCAL_FABRIC} functionality back to 'true'.`);
-                                await vscode.workspace.getConfiguration().update(SettingConfigurations.EXTENSION_LOCAL_FABRIC, true, vscode.ConfigurationTarget.Global);
-                                return;
-                            }
-                            await vscode.commands.executeCommand(ExtensionCommands.TEARDOWN_FABRIC, undefined, true, FabricRuntimeUtil.LOCAL_FABRIC);
-                        }
+                const localRuntime: LocalEnvironment = runtimes.find((_env: LocalEnvironment) => {
+                    return _env.getName() === FabricRuntimeUtil.LOCAL_FABRIC;
+                });
 
-                        // If disabled, delete the local environment, gateway and wallet
-                        await FabricEnvironmentRegistry.instance().delete(FabricRuntimeUtil.LOCAL_FABRIC, true);
-
-                        await vscode.commands.executeCommand('setContext', 'local-fabric-enabled', false);
-
-                    } catch (error) {
-                        outputAdapter.log(LogType.ERROR, `Error whilst toggling ${FabricRuntimeUtil.LOCAL_FABRIC} functionality to false: ${error.message}`, `Error whilst toggling ${FabricRuntimeUtil.LOCAL_FABRIC} functionality to false: ${error.toString()}`);
-                    }
-
-                } else {
-                    // Just got set to true
-                    outputAdapter.log(LogType.INFO, `${FabricRuntimeUtil.LOCAL_FABRIC} functionality set to 'true'.`);
-                    try {
-                        const bypassPreReqs: boolean = vscode.workspace.getConfiguration().get(SettingConfigurations.EXTENSION_BYPASS_PREREQS);
-                        let dependenciesInstalled: boolean = true;
-
-                        if (!bypassPreReqs) {
-                            const dependencyManager: DependencyManager = DependencyManager.instance();
-                            dependenciesInstalled = await dependencyManager.hasPreReqsInstalled();
-                            if (!dependenciesInstalled) {
-
-                                const ctx: vscode.ExtensionContext = GlobalState.getExtensionContext();
-
-                                this.disposeExtension(ctx);
-                                await this.registerOpenPreReqsCommand(ctx);
-                                const tempCommandRegistry: TemporaryCommandRegistry = TemporaryCommandRegistry.instance();
-
-                                tempCommandRegistry.createTempCommands(false, ExtensionCommands.OPEN_PRE_REQ_PAGE);
-                                await vscode.commands.executeCommand(ExtensionCommands.OPEN_PRE_REQ_PAGE);
-                                return;
-                            }
-                        }
-
-                        if (!isGenerated && dependenciesInstalled) {
-                            outputAdapter.log(LogType.INFO, undefined, 'Initializing local runtime manager');
-                            await LocalEnvironmentManager.instance().initialize();
-                        }
-                        await vscode.commands.executeCommand('setContext', 'local-fabric-enabled', true);
-                    } catch (error) {
-                        outputAdapter.log(LogType.ERROR, `Error whilst toggling ${FabricRuntimeUtil.LOCAL_FABRIC} functionality to true: ${error.message}`, `Error whilst toggling ${FabricRuntimeUtil.LOCAL_FABRIC} functionality to true: ${error.toString()}`);
-                    }
+                if (!localRuntime && localFabricEnabled) {
+                    // Just been set to true and there is no local runtime.
+                    outputAdapter.log(LogType.INFO, undefined, 'Initializing local runtime manager');
+                    await LocalEnvironmentManager.instance().initialize(FabricRuntimeUtil.LOCAL_FABRIC, 1);
                 }
 
                 // Show/Hide Local Fabric tree items
@@ -498,7 +509,7 @@ export class ExtensionUtil {
         await LocalEnvironmentManager.instance().migrate(version);
 
         outputAdapter.log(LogType.INFO, undefined, 'Initializing local runtime manager');
-        await LocalEnvironmentManager.instance().initialize();
+        await LocalEnvironmentManager.instance().initialize(FabricRuntimeUtil.LOCAL_FABRIC, 1);
     }
 
     public static async setupCommands(): Promise<void> {
@@ -605,29 +616,33 @@ export class ExtensionUtil {
 
             }
 
-            const runtime: LocalEnvironment = LocalEnvironmentManager.instance().getRuntime();
-            let generated: boolean = false;
+            // TODO JAKE: Pray this works and also doesn't handle terribly
+            const runtimes: LocalEnvironment[] = LocalEnvironmentManager.instance().getAllRuntimes();
+            for (const runtime of runtimes) {
+                // const runtime: LocalEnvironment = LocalEnvironmentManager.instance().getRuntime();
+                let generated: boolean = false;
 
-            if (runtime) {
-                generated = await runtime.isGenerated();
-            }
+                if (runtime) {
+                    generated = await runtime.isGenerated();
+                }
 
-            if (generated) {
-                // We know the user has a generated Fabric using an older version, so we should give the user the option to teardown either now or later
-                const response: boolean = await UserInputUtil.showConfirmationWarningMessage(`The ${FabricRuntimeUtil.LOCAL_FABRIC} configuration is out of date and must be torn down before updating. Do you want to teardown your ${FabricRuntimeUtil.LOCAL_FABRIC} now?`);
-                if (response) {
-                    const isRunning: boolean = await runtime.isRunning();
+                if (generated) {
+                    // We know the user has a generated Fabric using an older version, so we should give the user the option to teardown either now or later
+                    const response: boolean = await UserInputUtil.showConfirmationWarningMessage(`The ${FabricRuntimeUtil.LOCAL_FABRIC} configuration is out of date and must be torn down before updating. Do you want to teardown your ${FabricRuntimeUtil.LOCAL_FABRIC} now?`);
+                    if (response) {
+                        const isRunning: boolean = await runtime.isRunning();
 
-                    // Teardown and remove generated Fabric
-                    await vscode.commands.executeCommand(ExtensionCommands.TEARDOWN_FABRIC, undefined, true, FabricRuntimeUtil.LOCAL_FABRIC);
+                        // Teardown and remove generated Fabric
+                        await vscode.commands.executeCommand(ExtensionCommands.TEARDOWN_FABRIC, undefined, true, FabricRuntimeUtil.LOCAL_FABRIC);
 
-                    if (isRunning) {
-                        // Start the Fabric again
-                        await vscode.commands.executeCommand(ExtensionCommands.START_FABRIC);
+                        if (isRunning) {
+                            // Start the Fabric again
+                            await vscode.commands.executeCommand(ExtensionCommands.START_FABRIC);
+                        }
+                    } else {
+                        // Assume they will teardown later
+                        updateGeneratorVersion = false;
                     }
-                } else {
-                    // Assume they will teardown later
-                    updateGeneratorVersion = false;
                 }
             }
             // If they don't have a Fabric generated, we can update the version immediately

@@ -21,10 +21,11 @@ import { TestUtil } from '../TestUtil';
 import { VSCodeBlockchainOutputAdapter } from '../../extension/logging/VSCodeBlockchainOutputAdapter';
 import { ExtensionCommands } from '../../ExtensionCommands';
 import { Reporter } from '../../extension/util/Reporter';
-import { FabricEnvironmentRegistry, FabricEnvironmentRegistryEntry, LogType, EnvironmentType } from 'ibm-blockchain-platform-common';
+import { FabricEnvironmentRegistry, FabricEnvironmentRegistryEntry, LogType, EnvironmentType, FabricRuntimeUtil } from 'ibm-blockchain-platform-common';
 import { LocalEnvironment } from '../../extension/fabric/environments/LocalEnvironment';
 import { LocalEnvironmentManager } from '../../extension/fabric/environments/LocalEnvironmentManager';
 import { UserInputUtil} from '../../extension/commands/UserInputUtil';
+import { ExtensionUtil } from '../../extension/util/ExtensionUtil';
 
 // tslint:disable no-unused-expression
 chai.should();
@@ -35,7 +36,6 @@ describe('AddEnvironmentCommand', () => {
     let logSpy: sinon.SinonSpy;
     let showInputBoxStub: sinon.SinonStub;
     let chooseNameStub: sinon.SinonStub;
-    let chooseMethodStub: sinon.SinonStub;
     let executeCommandStub: sinon.SinonStub;
     let sendTelemetryEventStub: sinon.SinonStub;
     let showQuickPickItemStub: sinon.SinonStub;
@@ -53,7 +53,7 @@ describe('AddEnvironmentCommand', () => {
         beforeEach(async () => {
 
             try {
-                const localEnvironment: LocalEnvironment = LocalEnvironmentManager.instance().getRuntime();
+                const localEnvironment: LocalEnvironment = LocalEnvironmentManager.instance().getRuntime(FabricRuntimeUtil.LOCAL_FABRIC);
                 if (localEnvironment) {
                     await localEnvironment.teardown();
                 }
@@ -64,8 +64,7 @@ describe('AddEnvironmentCommand', () => {
 
             logSpy = mySandBox.spy(VSCodeBlockchainOutputAdapter.instance(), 'log');
             showQuickPickItemStub = mySandBox.stub(UserInputUtil, 'showQuickPickItem');
-            chooseMethodStub = showQuickPickItemStub.withArgs('Select a method to add an environment');
-            chooseMethodStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES});
+            showQuickPickItemStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES});
             environmentDirectoryPath = path.join(__dirname, '..', '..', '..', 'test', 'data', 'managedAnsible');
             const uri: vscode.Uri = vscode.Uri.file(environmentDirectoryPath);
             openFileBrowserStub = mySandBox.stub(UserInputUtil, 'openFileBrowser').resolves(uri);
@@ -137,7 +136,7 @@ describe('AddEnvironmentCommand', () => {
         });
 
         it('should handle cancel when choosing a method', async () => {
-            chooseMethodStub.resolves();
+            showQuickPickItemStub.resolves();
 
             await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
 
@@ -240,7 +239,7 @@ describe('AddEnvironmentCommand', () => {
         });
 
         it('should add a managed environment from an ansible dir', async () => {
-            chooseMethodStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
+            showQuickPickItemStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
 
             await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
 
@@ -266,7 +265,7 @@ describe('AddEnvironmentCommand', () => {
         });
 
         it('should add a non managed environment from an ansible dir', async () => {
-            chooseMethodStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
+            showQuickPickItemStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
 
             environmentDirectoryPath = path.join(environmentDirectoryPath, '..', 'nonManagedAnsible');
             const uri: vscode.Uri = vscode.Uri.file(environmentDirectoryPath);
@@ -296,7 +295,7 @@ describe('AddEnvironmentCommand', () => {
         });
 
         it('should handle cancel from choosing dir when adding from an ansible dir', async () => {
-            chooseMethodStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
+            showQuickPickItemStub.resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR});
 
             openFileBrowserStub.resolves();
 
@@ -306,6 +305,130 @@ describe('AddEnvironmentCommand', () => {
 
             logSpy.callCount.should.equal(1);
             logSpy.getCall(0).should.have.been.calledWith(LogType.INFO, undefined, 'Add environment');
+            sendTelemetryEventStub.should.not.have.been.calledOnceWithExactly('addEnvironmentCommand');
+        });
+
+        it('should be able to add a new 1-org local network', async () => {
+            const envName: string = 'New 1 Org Network';
+            showQuickPickItemStub.onCall(0).resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE});
+            showQuickPickItemStub.onCall(1).resolves({data: UserInputUtil.ONE_ORG_TEMPLATE});
+
+            showInputBoxStub.resolves(envName);
+            const initializeStub: sinon.SinonStub = mySandBox.stub(LocalEnvironmentManager.instance(), 'initialize').resolves();
+
+            const mockRuntime: sinon.SinonStubbedInstance<LocalEnvironment> = mySandBox.createStubInstance(LocalEnvironment);
+            mockRuntime.getName.returns(envName);
+            mockRuntime.generate.resolves();
+
+            const getRuntimeStub: sinon.SinonStub = mySandBox.stub(LocalEnvironmentManager.instance(), 'getRuntime').resolves(mockRuntime);
+
+            await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
+
+            showQuickPickItemStub.should.have.been.calledTwice;
+            showQuickPickItemStub.getCall(0).should.have.been.calledWith('Select a method to add an environment', [{label: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, description: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, description: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, description: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION}]);
+            showQuickPickItemStub.getCall(1).should.have.been.calledWith('Choose a configuration for a new local network', [{label: UserInputUtil.ONE_ORG_TEMPLATE, data: UserInputUtil.ONE_ORG_TEMPLATE}, {label: UserInputUtil.TWO_ORG_TEMPLATE, data: UserInputUtil.TWO_ORG_TEMPLATE}, {label: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS, data: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS}]);
+            showInputBoxStub.should.have.been.calledOnceWithExactly(`Provide a name for this Fabric Environment (avoid duplicating an existing name)`);
+            initializeStub.should.have.been.calledWith(envName, 1);
+            getRuntimeStub.should.have.been.calledOnceWith(envName);
+            mockRuntime.generate.should.have.been.calledOnce;
+
+            executeCommandStub.should.not.have.been.calledWith(ExtensionCommands.IMPORT_NODES_TO_ENVIRONMENT, sinon.match.instanceOf(FabricEnvironmentRegistryEntry));
+
+            deleteEnvironmentSpy.should.have.not.been.called;
+            logSpy.getCall(0).should.have.been.calledWith(LogType.INFO, undefined, 'Add environment');
+            logSpy.getCall(1).should.have.been.calledWith(LogType.SUCCESS, 'Successfully added a new environment');
+            sendTelemetryEventStub.should.have.been.calledOnceWithExactly('addEnvironmentCommand');
+        });
+
+        it('should be able to add a new 2-org local network', async () => {
+            const envName: string = 'New 2 Org Network';
+            showQuickPickItemStub.onCall(0).resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE});
+            showQuickPickItemStub.onCall(1).resolves({data: UserInputUtil.TWO_ORG_TEMPLATE});
+
+            showInputBoxStub.resolves(envName);
+            const initializeStub: sinon.SinonStub = mySandBox.stub(LocalEnvironmentManager.instance(), 'initialize').resolves();
+
+            const mockRuntime: sinon.SinonStubbedInstance<LocalEnvironment> = mySandBox.createStubInstance(LocalEnvironment);
+            mockRuntime.getName.returns(envName);
+            mockRuntime.generate.resolves();
+
+            const getRuntimeStub: sinon.SinonStub = mySandBox.stub(LocalEnvironmentManager.instance(), 'getRuntime').resolves(mockRuntime);
+
+            await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
+
+            showQuickPickItemStub.should.have.been.calledTwice;
+            showQuickPickItemStub.getCall(0).should.have.been.calledWith('Select a method to add an environment', [{label: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, description: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, description: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, description: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION}]);
+            showQuickPickItemStub.getCall(1).should.have.been.calledWith('Choose a configuration for a new local network', [{label: UserInputUtil.ONE_ORG_TEMPLATE, data: UserInputUtil.ONE_ORG_TEMPLATE}, {label: UserInputUtil.TWO_ORG_TEMPLATE, data: UserInputUtil.TWO_ORG_TEMPLATE}, {label: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS, data: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS}]);
+
+            showInputBoxStub.should.have.been.calledOnceWithExactly(`Provide a name for this Fabric Environment (avoid duplicating an existing name)`);
+            initializeStub.should.have.been.calledWith(envName, 2);
+            getRuntimeStub.should.have.been.calledOnceWith(envName);
+            mockRuntime.generate.should.have.been.calledOnce;
+
+            executeCommandStub.should.not.have.been.calledWith(ExtensionCommands.IMPORT_NODES_TO_ENVIRONMENT, sinon.match.instanceOf(FabricEnvironmentRegistryEntry));
+
+            deleteEnvironmentSpy.should.have.not.been.called;
+            logSpy.getCall(0).should.have.been.calledWith(LogType.INFO, undefined, 'Add environment');
+            logSpy.getCall(1).should.have.been.calledWith(LogType.SUCCESS, 'Successfully added a new environment');
+            sendTelemetryEventStub.should.have.been.calledOnceWithExactly('addEnvironmentCommand');
+        });
+
+        it('should return when cancelling selecting a network configuration', async () => {
+            showQuickPickItemStub.onCall(0).resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE});
+            showQuickPickItemStub.onCall(1).resolves();
+
+            const initializeSpy: sinon.SinonSpy = mySandBox.spy(LocalEnvironmentManager.instance(), 'initialize');
+
+            const getRuntimeSpy: sinon.SinonSpy = mySandBox.spy(LocalEnvironmentManager.instance(), 'getRuntime');
+
+            await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
+
+            showQuickPickItemStub.should.have.been.calledTwice;
+            showQuickPickItemStub.getCall(0).should.have.been.calledWith('Select a method to add an environment', [{label: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, description: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, description: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, description: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION}]);
+            showQuickPickItemStub.getCall(1).should.have.been.calledWith('Choose a configuration for a new local network', [{label: UserInputUtil.ONE_ORG_TEMPLATE, data: UserInputUtil.ONE_ORG_TEMPLATE}, {label: UserInputUtil.TWO_ORG_TEMPLATE, data: UserInputUtil.TWO_ORG_TEMPLATE}, {label: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS, data: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS}]);
+
+            showInputBoxStub.should.not.have.been.calledOnceWithExactly(`Provide a name for this Fabric Environment (avoid duplicating an existing name)`);
+            initializeSpy.should.not.have.been.called;
+            getRuntimeSpy.should.not.have.been.called;
+
+            executeCommandStub.should.not.have.been.calledWith(ExtensionCommands.IMPORT_NODES_TO_ENVIRONMENT, sinon.match.instanceOf(FabricEnvironmentRegistryEntry));
+
+            deleteEnvironmentSpy.should.have.not.been.called;
+            logSpy.getCall(0).should.have.been.calledWith(LogType.INFO, undefined, 'Add environment');
+            logSpy.should.not.have.been.calledWith(LogType.SUCCESS, 'Successfully added a new environment');
+            sendTelemetryEventStub.should.not.have.been.calledOnceWithExactly('addEnvironmentCommand');
+        });
+
+        it('should open tutorial if user wants to learn about creating additional networks', async () => {
+            showQuickPickItemStub.onCall(0).resolves({data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE});
+            showQuickPickItemStub.onCall(1).resolves({data: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS});
+
+            const initializeSpy: sinon.SinonSpy = mySandBox.spy(LocalEnvironmentManager.instance(), 'initialize');
+
+            const getRuntimeSpy: sinon.SinonSpy = mySandBox.spy(LocalEnvironmentManager.instance(), 'getRuntime');
+
+            await vscode.commands.executeCommand(ExtensionCommands.ADD_ENVIRONMENT);
+
+            showQuickPickItemStub.should.have.been.calledTwice;
+            showQuickPickItemStub.getCall(0).should.have.been.calledWith('Select a method to add an environment', [{label: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, data: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE, description: UserInputUtil.ADD_ENVIRONMENT_FROM_TEMPLATE_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, data: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR, description: UserInputUtil.ADD_ENVIRONMENT_FROM_DIR_DESCRIPTION}, {label: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, data: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES, description: UserInputUtil.ADD_ENVIRONMENT_FROM_NODES_DESCRIPTION}]);
+            showQuickPickItemStub.getCall(1).should.have.been.calledWith('Choose a configuration for a new local network', [{label: UserInputUtil.ONE_ORG_TEMPLATE, data: UserInputUtil.ONE_ORG_TEMPLATE}, {label: UserInputUtil.TWO_ORG_TEMPLATE, data: UserInputUtil.TWO_ORG_TEMPLATE}, {label: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS, data: UserInputUtil.CREATE_ADDITIONAL_LOCAL_NETWORKS}]);
+
+            showInputBoxStub.should.not.have.been.calledOnceWithExactly(`Provide a name for this Fabric Environment (avoid duplicating an existing name)`);
+            initializeSpy.should.not.have.been.called;
+            getRuntimeSpy.should.not.have.been.called;
+
+            executeCommandStub.should.not.have.been.calledWith(ExtensionCommands.IMPORT_NODES_TO_ENVIRONMENT, sinon.match.instanceOf(FabricEnvironmentRegistryEntry));
+
+            const extPath: string = ExtensionUtil.getExtensionPath();
+            const tutorialPath: string = path.join(extPath, 'packages', 'blockchain-extension', 'tutorials', 'developer-tutorials', 'create-additional-local-networks.md');
+
+            const executeCallOne: sinon.SinonSpyCall = executeCommandStub.getCall(1);
+            executeCallOne.should.have.been.calledWith('markdown.showPreview', sinon.match.any);
+            executeCallOne.args[1].path.should.equal(tutorialPath);
+
+            deleteEnvironmentSpy.should.have.not.been.called;
+            logSpy.getCall(0).should.have.been.calledWith(LogType.INFO, undefined, 'Add environment');
+            logSpy.should.not.have.been.calledWith(LogType.SUCCESS, 'Successfully added a new environment');
             sendTelemetryEventStub.should.not.have.been.calledOnceWithExactly('addEnvironmentCommand');
         });
     });

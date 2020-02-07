@@ -1760,9 +1760,11 @@ describe('ExtensionUtil Tests', () => {
 
                 getSettingsStub.withArgs(SettingConfigurations.EXTENSION_LOCAL_FABRIC).returns(false);
                 getSettingsStub.withArgs(SettingConfigurations.FABRIC_RUNTIME).returns({
-                    ports: {
-                        startPort: 17050,
-                        endPort: 17070
+                    '1 Org Local Fabric': {
+                        ports: {
+                            startPort: 17050,
+                            endPort: 17070
+                        }
                     }
                 });
                 getSettingsStub.withArgs(SettingConfigurations.EXTENSION_DIRECTORY).returns(TestUtil.EXTENSION_TEST_DIR);
