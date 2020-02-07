@@ -24,6 +24,7 @@ import { SettingConfigurations } from '../../../configurations';
 import { FabricEnvironmentManager } from './FabricEnvironmentManager';
 import { VSCodeBlockchainDockerOutputAdapter } from '../../logging/VSCodeBlockchainDockerOutputAdapter';
 import { LocalEnvironment } from './LocalEnvironment';
+import { EnvironmentFactory } from './EnvironmentFactory';
 
 export class LocalEnvironmentManager {
 
@@ -35,19 +36,40 @@ export class LocalEnvironmentManager {
 
     private static _instance: LocalEnvironmentManager = new LocalEnvironmentManager();
 
-    private runtime: LocalEnvironment;
+    private runtimes: Map<string, LocalEnvironment> = new Map();
 
     private constructor() {
     }
 
-    public getRuntime(): LocalEnvironment {
-        return this.runtime;
+    public getAllRuntimes(): LocalEnvironment[] {
+        const runtimes: LocalEnvironment[] = [];
+        for (const runtime of this.runtimes.values()) {
+            runtimes.push(runtime);
+        }
+        return runtimes;
     }
 
-    public async initialize(): Promise<void> {
+    public getRuntime(name: string): LocalEnvironment {
+        return this.runtimes.get(name);
+    }
+
+    public ensureRuntime(name: string, ports?: FabricRuntimePorts, numberOfOrgs?: number): LocalEnvironment {
+        // Return the environment instance if it has already been created.
+        // Else create a new instance of the environment.
+
+        let runtime: LocalEnvironment = this.getRuntime(name);
+        if (!runtime) {
+            runtime = new LocalEnvironment(name, ports, numberOfOrgs);
+            this.runtimes.set(name, runtime);
+        }
+
+        return runtime;
+    }
+
+    public async initialize(name: string, numberOfOrgs: number): Promise<void> {
 
         // only generate a range of ports if it doesn't already exist
-        const runtimeObject: any = this.readRuntimeUserSettings();
+        const runtimeObject: any = this.readRuntimeUserSettings(name);
 
         let updatedPorts: boolean = false;
         if (runtimeObject.ports) {
@@ -72,8 +94,7 @@ export class LocalEnvironmentManager {
 
             }
 
-            this.runtime = new LocalEnvironment();
-            this.runtime.ports = runtimeObject.ports;
+            this.ensureRuntime(name, runtimeObject.ports, numberOfOrgs);
 
         } else {
             updatedPorts = true;
@@ -82,30 +103,34 @@ export class LocalEnvironmentManager {
             const ports: FabricRuntimePorts = await this.generatePortConfiguration();
 
             // Add the Fabric runtime to the internal cache.
-            this.runtime = new LocalEnvironment();
-            this.runtime.ports = ports;
+            this.ensureRuntime(name, ports, numberOfOrgs);
         }
 
+        const runtime: LocalEnvironment = this.runtimes.get(name);
         if (updatedPorts) {
-            await this.runtime.updateUserSettings();
+            await runtime.updateUserSettings(name);
         }
 
         // Check to see if the runtime has been created.
-        const created: boolean = await this.runtime.isCreated();
+        const created: boolean = await runtime.isCreated();
         if (!created) {
-            await this.runtime.create();
+            await runtime.create();
         }
+
+        let _runtime: LocalEnvironment; // Currently connected environment
 
         FabricEnvironmentManager.instance().on('connected', async () => {
             const registryEntry: FabricEnvironmentRegistryEntry = FabricEnvironmentManager.instance().getEnvironmentRegistryEntry();
-            if (registryEntry.managedRuntime && registryEntry.name === FabricRuntimeUtil.LOCAL_FABRIC) {
-                const outputAdapter: VSCodeBlockchainDockerOutputAdapter = VSCodeBlockchainDockerOutputAdapter.instance();
-                await this.runtime.startLogs(outputAdapter);
+            // When we connect to an environment, we need to get the runtime.
+            _runtime = EnvironmentFactory.getEnvironment(registryEntry) as LocalEnvironment;
+            if (registryEntry.managedRuntime) {
+                const outputAdapter: VSCodeBlockchainDockerOutputAdapter = VSCodeBlockchainDockerOutputAdapter.instance(registryEntry.name);
+                await _runtime.startLogs(outputAdapter);
             }
         });
 
         FabricEnvironmentManager.instance().on('disconnected', async () => {
-            this.runtime.stopLogs();
+            _runtime.stopLogs();
         });
     }
 
@@ -116,13 +141,14 @@ export class LocalEnvironmentManager {
         await this.migrateRuntimeFolder();
     }
 
-    private readRuntimeUserSettings(): any {
+    private readRuntimeUserSettings(name?: string): any {
         const runtimeSettings: any = vscode.workspace.getConfiguration().get(SettingConfigurations.FABRIC_RUNTIME);
-        if (runtimeSettings.ports) {
-            return runtimeSettings;
+        if (name && runtimeSettings[name] && runtimeSettings[name].ports) {
+            return runtimeSettings[name];
         } else {
             return {};
         }
+
     }
 
     private async migrateRuntimesConfiguration(): Promise<any> {
@@ -204,14 +230,20 @@ export class LocalEnvironmentManager {
         // Execute the teardown scripts.
         const basicNetworkPath: string = path.resolve(__dirname, '..', '..', '..', 'basic-network');
         const outputAdapter: VSCodeBlockchainOutputAdapter = VSCodeBlockchainOutputAdapter.instance();
-        outputAdapter.log(LogType.WARNING, null, `Attempting to teardown old ${this.runtime.getName()} from version <= 0.3.3`);
-        outputAdapter.log(LogType.WARNING, null, 'Any error messages from this process can be safely ignored (for example, container does not exist');
-        if (process.platform === 'win32') {
-            await CommandUtil.sendCommandWithOutput('cmd', ['/c', 'teardown.cmd'], basicNetworkPath, null, outputAdapter);
-        } else {
-            await CommandUtil.sendCommandWithOutput('/bin/sh', ['teardown.sh'], basicNetworkPath, null, outputAdapter);
+
+        // Presumably we want to teardown every local Fabric (?)
+        for (const runtime of this.runtimes.values()) {
+
+            outputAdapter.log(LogType.WARNING, null, `Attempting to teardown old ${runtime.getName()} from version <= 0.3.3`);
+            outputAdapter.log(LogType.WARNING, null, 'Any error messages from this process can be safely ignored (for example, container does not exist');
+            if (process.platform === 'win32') {
+                await CommandUtil.sendCommandWithOutput('cmd', ['/c', 'teardown.cmd'], basicNetworkPath, null, outputAdapter);
+            } else {
+                await CommandUtil.sendCommandWithOutput('/bin/sh', ['teardown.sh'], basicNetworkPath, null, outputAdapter);
+            }
+            outputAdapter.log(LogType.WARNING, null, `Finished attempting to teardown old ${runtime.getName()} from version <= 0.3.3`);
+
         }
-        outputAdapter.log(LogType.WARNING, null, `Finished attempting to teardown old ${this.runtime.getName()} from version <= 0.3.3`);
 
     }
 

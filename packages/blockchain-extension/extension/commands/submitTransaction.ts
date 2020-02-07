@@ -21,7 +21,7 @@ import { VSCodeBlockchainOutputAdapter } from '../logging/VSCodeBlockchainOutput
 import { ExtensionCommands } from '../../ExtensionCommands';
 import { VSCodeBlockchainDockerOutputAdapter } from '../logging/VSCodeBlockchainDockerOutputAdapter';
 import { InstantiatedTreeItem } from '../explorer/model/InstantiatedTreeItem';
-import { IFabricGatewayConnection, FabricRuntimeUtil, LogType, FabricGatewayRegistryEntry } from 'ibm-blockchain-platform-common';
+import { IFabricGatewayConnection, LogType, FabricGatewayRegistryEntry, FabricEnvironmentRegistryEntry, FabricEnvironmentRegistry, EnvironmentType } from 'ibm-blockchain-platform-common';
 
 export async function submitTransaction(evaluate: boolean, treeItem?: InstantiatedTreeItem | TransactionTreeItem, channelName?: string, smartContract?: string, transactionObject?: any): Promise<void | string> {
     const outputAdapter: VSCodeBlockchainOutputAdapter = VSCodeBlockchainOutputAdapter.instance();
@@ -193,9 +193,13 @@ export async function submitTransaction(evaluate: boolean, treeItem?: Instantiat
                 outputAdapter.log(LogType.INFO, undefined, `${actioning} transaction ${transactionName} with args ${args} on channel ${channelName}${peerTargetMessage}`);
             }
 
-            const gatewayRegistyrEntry: FabricGatewayRegistryEntry = FabricGatewayConnectionManager.instance().getGatewayRegistryEntry();
-            if (gatewayRegistyrEntry.name === FabricRuntimeUtil.LOCAL_FABRIC) {
-                VSCodeBlockchainDockerOutputAdapter.instance().show();
+            const gatewayRegistryEntry: FabricGatewayRegistryEntry = FabricGatewayConnectionManager.instance().getGatewayRegistryEntry();
+            if (gatewayRegistryEntry.fromEnvironment) {
+                const environmentEntry: FabricEnvironmentRegistryEntry = await FabricEnvironmentRegistry.instance().get(gatewayRegistryEntry.fromEnvironment);
+                if (environmentEntry.environmentType === EnvironmentType.LOCAL_ENVIRONMENT) {
+                    VSCodeBlockchainDockerOutputAdapter.instance(environmentEntry.name).show();
+                }
+
             }
 
             let result: string | undefined;

@@ -135,7 +135,8 @@ describe('Metadata ConnectionProfileUtil tests', () => {
         logSpy = mySandBox.spy(VSCodeBlockchainOutputAdapter.instance(), 'log');
 
         localGateway = new FabricGatewayRegistryEntry();
-        localGateway.name = FabricRuntimeUtil.LOCAL_FABRIC;
+        localGateway.name = `${FabricRuntimeUtil.LOCAL_FABRIC} - Org1`;
+        localGateway.fromEnvironment = FabricRuntimeUtil.LOCAL_FABRIC;
 
         otherGateway = new FabricGatewayRegistryEntry();
         otherGateway.name = 'myFabric';

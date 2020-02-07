@@ -61,7 +61,7 @@ describe('FabricEnvironmentConnection', () => {
         FabricEnvironmentRegistry.instance().setRegistryPath(path.join(__dirname, 'tmp', 'registries'));
         await FabricWalletRegistry.instance().clear();
         await FabricEnvironmentRegistry.instance().clear();
-        await FabricEnvironmentRegistry.instance().add(new FabricEnvironmentRegistryEntry({ name: 'Local Fabric', environmentDirectory: path.join(__dirname, 'data', 'Local Fabric'), environmentType: EnvironmentType.ANSIBLE_ENVIRONMENT }));
+        await FabricEnvironmentRegistry.instance().add(new FabricEnvironmentRegistryEntry({ name: FabricRuntimeUtil.LOCAL_FABRIC, environmentDirectory: path.join(__dirname, 'data', FabricRuntimeUtil.LOCAL_FABRIC), environmentType: EnvironmentType.ANSIBLE_ENVIRONMENT }));
     });
 
     beforeEach(async () => {
@@ -169,7 +169,7 @@ describe('FabricEnvironmentConnection', () => {
         mockLocalWallet.getIdentities.resolves([]);
         mockFabricWalletGenerator.resolves(mockLocalWallet);
 
-        connection = new FabricEnvironmentConnection('Local Fabric');
+        connection = new FabricEnvironmentConnection('1 Org Local Fabric');
         await connection.connect(nodes);
     });
 
@@ -179,15 +179,15 @@ describe('FabricEnvironmentConnection', () => {
 
     describe('constructor', () => {
         it('should default to the console output adapter', () => {
-            connection = new FabricEnvironmentConnection('Local Fabric');
+            connection = new FabricEnvironmentConnection('1 Org Local Fabric');
             connection['outputAdapter'].should.be.an.instanceOf(ConsoleOutputAdapter);
-            connection['environmentName'].should.equal('Local Fabric');
+            connection['environmentName'].should.equal('1 Org Local Fabric');
         });
 
         it('should accept another output adapter', () => {
-            connection = new FabricEnvironmentConnection('Local Fabric', TestOutputAdapter.instance());
+            connection = new FabricEnvironmentConnection('1 Org Local Fabric', TestOutputAdapter.instance());
             connection['outputAdapter'].should.be.an.instanceOf(TestOutputAdapter);
-            connection['environmentName'].should.equal('Local Fabric');
+            connection['environmentName'].should.equal('1 Org Local Fabric');
         });
     });
 

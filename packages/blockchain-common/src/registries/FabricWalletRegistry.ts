@@ -83,7 +83,7 @@ export class FabricWalletRegistry extends FileRegistry<FabricWalletRegistryEntry
 
         // just get the ansible ones
         environmentEntries = environmentEntries.filter((entry: FabricEnvironmentRegistryEntry) => {
-            return entry.environmentType === EnvironmentType.ANSIBLE_ENVIRONMENT;
+            return entry.environmentType === EnvironmentType.ANSIBLE_ENVIRONMENT || entry.environmentType === EnvironmentType.LOCAL_ENVIRONMENT;
         });
 
         for (const environmentEntry of environmentEntries) {

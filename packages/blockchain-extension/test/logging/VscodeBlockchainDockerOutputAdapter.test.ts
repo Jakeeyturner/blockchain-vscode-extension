@@ -13,7 +13,7 @@
 */
 
 import { VSCodeBlockchainDockerOutputAdapter } from '../../extension/logging/VSCodeBlockchainDockerOutputAdapter';
-import { LogType } from 'ibm-blockchain-platform-common';
+import { LogType, FabricRuntimeUtil } from 'ibm-blockchain-platform-common';
 
 import * as chai from 'chai';
 import * as sinon from 'sinon';
@@ -23,7 +23,7 @@ chai.should();
 // tslint:disable no-unused-expression
 describe('VSCodeBlockchainDockerOutputAdapter', () => {
 
-    const outputAdapter: VSCodeBlockchainDockerOutputAdapter = VSCodeBlockchainDockerOutputAdapter.instance();
+    const outputAdapter: VSCodeBlockchainDockerOutputAdapter = VSCodeBlockchainDockerOutputAdapter.instance(FabricRuntimeUtil.LOCAL_FABRIC);
     let sandbox: sinon.SinonSandbox;
 
     beforeEach(async () => {

@@ -16,20 +16,31 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ManagedAnsibleEnvironment } from './ManagedAnsibleEnvironment';
 import { YeomanUtil } from '../../util/YeomanUtil';
-import { FabricRuntimeUtil, FabricEnvironmentRegistry, FabricEnvironmentRegistryEntry, EnvironmentType, OutputAdapter, FileSystemUtil, FileConfigurations } from 'ibm-blockchain-platform-common';
+import { FabricEnvironmentRegistry, FabricEnvironmentRegistryEntry, EnvironmentType, OutputAdapter, FileSystemUtil, FileConfigurations, LogType } from 'ibm-blockchain-platform-common';
 import { SettingConfigurations } from '../../../configurations';
 import { FabricRuntimePorts } from '../FabricRuntimePorts';
+import * as loghose from 'docker-loghose';
+import * as through from 'through2';
+import stripAnsi = require('strip-ansi');
 
 export class LocalEnvironment extends ManagedAnsibleEnvironment {
-    public ports?: FabricRuntimePorts;
+    public ourLoghose: any;
+    public ports: FabricRuntimePorts;
     private dockerName: string;
+    private numberOfOrgs: number;
 
-    constructor() {
+    constructor(name: string, ports: FabricRuntimePorts, numberOfOrgs: number) {
         const extDir: string = vscode.workspace.getConfiguration().get(SettingConfigurations.EXTENSION_DIRECTORY);
         const resolvedExtDir: string = FileSystemUtil.getDirPath(extDir);
-        const envPath: string = path.join(resolvedExtDir, FileConfigurations.FABRIC_ENVIRONMENTS, FabricRuntimeUtil.LOCAL_FABRIC);
-        super(FabricRuntimeUtil.LOCAL_FABRIC, envPath);
-        this.dockerName = `fabricvscodelocalfabric`;
+        const envPath: string = path.join(resolvedExtDir, FileConfigurations.FABRIC_ENVIRONMENTS, name);
+        super(name, envPath);
+
+        const dockerName: string = name.replace(/[^A-Za-z0-9]/g, ''); // Filter out invalid characters
+        this.dockerName = dockerName;
+
+        this.ports = ports;
+        this.numberOfOrgs = numberOfOrgs;
+
     }
 
     public async create(): Promise<void> {
@@ -40,7 +51,7 @@ export class LocalEnvironment extends ManagedAnsibleEnvironment {
         const registryEntry: FabricEnvironmentRegistryEntry = new FabricEnvironmentRegistryEntry({
             name: this.name,
             managedRuntime: true,
-            environmentType: EnvironmentType.ANSIBLE_ENVIRONMENT,
+            environmentType: EnvironmentType.LOCAL_ENVIRONMENT,
             environmentDirectory: path.join(this.path)
         });
 
@@ -51,7 +62,7 @@ export class LocalEnvironment extends ManagedAnsibleEnvironment {
             destination: this.path,
             name: this.name,
             dockerName: this.dockerName,
-            numOrganizations: 1,
+            numOrganizations: this.numberOfOrgs,
             startPort: this.ports.startPort,
             endPort: this.ports.endPort
         });
@@ -78,15 +89,60 @@ export class LocalEnvironment extends ManagedAnsibleEnvironment {
         }
     }
 
-    public async updateUserSettings(): Promise<void> {
-        const runtimeObject: any = {
-            ports: this.ports
-        };
-        await vscode.workspace.getConfiguration().update(SettingConfigurations.FABRIC_RUNTIME, runtimeObject, vscode.ConfigurationTarget.Global);
+    public async updateUserSettings(name: string): Promise<void> {
+        const settings: any = await vscode.workspace.getConfiguration().get(SettingConfigurations.FABRIC_RUNTIME, vscode.ConfigurationTarget.Global);
+        if (!settings[name]) {
+            settings[name] = {
+                ports: {
+                    startPort: this.ports.startPort,
+                    endPort: this.ports.endPort
+                }
+            };
+        } else {
+            settings[name].ports = this.ports;
+        }
+        await vscode.workspace.getConfiguration().update(SettingConfigurations.FABRIC_RUNTIME, settings, vscode.ConfigurationTarget.Global);
     }
 
     public async killChaincode(args?: string[], outputAdapter?: OutputAdapter): Promise<void> {
         await this.killChaincodeInner(args, outputAdapter);
+    }
+
+    public async startLogs(outputAdapter: OutputAdapter): Promise<void> {
+        const opts: any = {
+            attachFilter: (_id: any, dockerInspectInfo: any): boolean => {
+                if (dockerInspectInfo.Name.startsWith('/fabricvscodelocalfabric')) {
+                    return true;
+                } else {
+                    const labels: object = dockerInspectInfo.Config.Labels;
+                    const environmentName: string = labels['fabric-environment-name'];
+                    return environmentName === this.name;
+                }
+            },
+            newline: true
+        };
+        const lh: any = this.ourLoghose(opts);
+
+        lh.pipe(through.obj((chunk: any, _enc: any, cb: any) => {
+            const name: string = chunk.name;
+            const line: string = stripAnsi(chunk.line);
+            outputAdapter.log(LogType.INFO, undefined, `${name}|${line}`);
+            cb();
+        }));
+
+        this.lh = lh;
+    }
+
+    public stopLogs(): void {
+        if (this.lh) {
+            this.lh.destroy();
+        }
+        this.lh = null;
+    }
+
+    public getLoghose(opts: any): any {
+        // This makes the startLogs testable
+        return loghose(opts);
     }
 
     protected async isRunningInner(args?: string[]): Promise<boolean> {
